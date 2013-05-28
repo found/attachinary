@@ -11,9 +11,11 @@
           <% for(var i=0; i<files.length; i++){ %>
             <li>
               <img
-                src="<%= $.cloudinary.url(files[i].public_id, { "version": files[i].version, "format": 'jpg', "crop": 'fill', "width": 75, "height": 75 }) %>"
-                alt="" width="75" height="75" />
-              <a href="#" data-remove="<%= files[i].public_id %>">Remove</a>
+                src="<%= $.cloudinary.url(files[i].public_id, { "version": files[i].version, "format": 'jpg', "crop": 'fill', "width": 150, "height": 150 }) %>"
+                alt="" width="150" height="150" />
+              <a href="#" data-remove="<%= files[i].public_id %>" class="attachinary-remove">Remove</a>
+              <a href="#" data-promote="<%= files[i].public_id %>" class="attachinary-promote position-<%= i %>">Make Primary</a>
+              <span class="attachinary-primary">Primary Photo</span>
             </li>
           <% } %>
         </ul>
@@ -118,6 +120,13 @@
       @redraw()
       @checkMaximum()
 
+    promoteFile: (fileIdToPromote) ->
+      @promoted = (pro for pro in @files when pro.public_id == fileIdToPromote)
+      @files = (file for file in @files when file.public_id != fileIdToPromote)
+      @files = @promoted.concat(@files)
+      @redraw()
+      @checkMaximum()
+
     checkMaximum: ->
       if @maximumReached()
         @$input.prop('disabled', true)
@@ -143,6 +152,10 @@
         @$filesContainer.find('[data-remove]').on 'click', (event) =>
           event.preventDefault()
           @removeFile $(event.target).data('remove')
+
+        @$filesContainer.find('[data-promote]').on 'click', (event) =>
+          event.preventDefault()
+          @promoteFile $(event.target).data('promote')
 
         @$filesContainer.show()
       else
